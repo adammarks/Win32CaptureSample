@@ -113,6 +113,12 @@ void SimpleCapture::OnFrameArrived(winrt::Direct3D11CaptureFramePool const& send
         auto frame = sender.TryGetNextFrame();
         swapChainResizedToFrame = TryResizeSwapChain(frame);
 
+        auto timestamp = frame.SystemRelativeTime().count();
+        LARGE_INTEGER qpcTime;
+        QueryPerformanceCounter(&qpcTime);
+        auto diffInMilliseconds = (qpcTime.QuadPart - timestamp) / 10000;
+        OutputDebugString((L"Diff in milliseconds : " + std::to_wstring(diffInMilliseconds) + L"\n").c_str());
+
         winrt::com_ptr<ID3D11Texture2D> backBuffer;
         winrt::check_hresult(m_swapChain->GetBuffer(0, winrt::guid_of<ID3D11Texture2D>(), backBuffer.put_void()));
         auto surfaceTexture = GetDXGIInterfaceFromObject<ID3D11Texture2D>(frame.Surface());
